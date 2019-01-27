@@ -7,11 +7,11 @@
 //
 
 import Foundation
+import Cache
 
-
-class Weather:BaseModel ,ApiManagerDelegate{
+class Weather:BaseModel ,ApiManagerDelegate ,NSCoding {
     
-    var description:String!
+    var weatherDescription:String!
     
     var icon:String!
     
@@ -32,7 +32,7 @@ class Weather:BaseModel ,ApiManagerDelegate{
         city = City(json: json)
         
         let weatherJson = (json["weather"] as! [[String:Any]]).first!
-        description = weatherJson["description"] as! String
+        weatherDescription = weatherJson["description"] as! String
         icon = weatherJson["icon"] as! String
         if let windsJson = json["wind"] as? [String:Any] {
             windsSpeed = String(windsJson["speed"] as! Double)
@@ -50,6 +50,40 @@ class Weather:BaseModel ,ApiManagerDelegate{
     func getCityWeather(lat:Double,lng:Double) {
         content.getCityWeather(lat: lat, lng: lng)
     }
+    
+    required convenience init(coder aDecoder: NSCoder) {
+        self.init()
+        self.id = aDecoder.decodeObject(forKey: "id") as! Int
+        
+        self.name = aDecoder.decodeObject(forKey: "name") as! String
+        self.weatherDescription = aDecoder.decodeObject(forKey: "description") as! String
+        self.icon = aDecoder.decodeObject(forKey: "icon") as! String
+        
+        self.windsSpeed = aDecoder.decodeObject(forKey: "windsSpeed") as! String
+        
+        self.city.id = aDecoder.decodeObject(forKey: "cityId")  as! Int
+        self.city.name = aDecoder.decodeObject(forKey: "cityName") as! String
+        self.city.lat = aDecoder.decodeObject(forKey: "cityLat") as! Double
+        self.city.lng = aDecoder.decodeObject(forKey: "cityLng") as! Double
+        
+        
+    }
+    
+    func encode(with aCoder: NSCoder) {
+        aCoder.encode(id, forKey: "id")
+        aCoder.encode(name, forKey: "name")
+        aCoder.encode(weatherDescription, forKey: "description")
+        aCoder.encode(icon, forKey: "icon")
+        aCoder.encode(windsSpeed, forKey: "windsSpeed")
+
+        
+        aCoder.encode(city.id, forKey: "cityId")
+        aCoder.encode(city.name, forKey: "cityName")
+        aCoder.encode(city.lat, forKey: "cityLat")
+        aCoder.encode(city.lng, forKey: "cityLng")
+        
+    }
+    
     
     func onPreExecute(action: ApiManager.ActionType) {
         viewModel.update(action: .wait)

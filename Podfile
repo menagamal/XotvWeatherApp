@@ -12,5 +12,6 @@ target 'WeatherApp' do
     pod 'GooglePlacePicker'
     
     pod 'SDWebImage'
+    pod 'Cache'
     
 end

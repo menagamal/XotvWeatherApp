@@ -9,6 +9,7 @@
 import UIKit
 import GoogleMaps
 import CoreLocation
+import Alamofire
 
 class ViewController: UIViewController ,GMSMapViewDelegate,CLLocationManagerDelegate{
     
@@ -30,6 +31,12 @@ class ViewController: UIViewController ,GMSMapViewDelegate,CLLocationManagerDele
         
         self.locationManager.delegate = self
         self.locationManager.startUpdatingLocation()
+        if !NetworkReachabilityManager()!.isReachable {
+            let main = UIStoryboard(name: "Main", bundle: nil)
+            let vc = main.instantiateViewController(withIdentifier: "WeatherViewController") as! WeatherViewController
+            vc.shouldCache = true
+            self.show(vc, sender: self)
+        }
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
@@ -46,11 +53,15 @@ class ViewController: UIViewController ,GMSMapViewDelegate,CLLocationManagerDele
     }
     
     func mapView(_ mapView: GMSMapView, didLongPressAt coordinate: CLLocationCoordinate2D) {
-        
         let main = UIStoryboard(name: "Main", bundle: nil)
         let vc = main.instantiateViewController(withIdentifier: "WeatherViewController") as! WeatherViewController
-        vc.lat = coordinate.latitude
-        vc.lng = coordinate.longitude
+        
+        if !NetworkReachabilityManager()!.isReachable {
+           vc.shouldCache = true
+        } else {
+            vc.lat = coordinate.latitude
+            vc.lng = coordinate.longitude
+        }
         self.show(vc, sender: self)
         
     }

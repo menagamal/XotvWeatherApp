@@ -8,12 +8,13 @@
 
 import Foundation
 
-class BaseModel {
+class BaseModel : NSObject{
     
     var id:Int!
     var name:String!
     
-    init() {
+    
+    override init() {
         
     }
     

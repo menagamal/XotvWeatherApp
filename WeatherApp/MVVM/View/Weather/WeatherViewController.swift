@@ -25,6 +25,9 @@ class WeatherViewController: UIViewController ,WeatherView {
     
     var loadingView:LoadingView!
     
+    var shouldCache = false
+    var userDefaults = UserDefaults.standard
+
     override func viewDidLoad() {
         super.viewDidLoad()
         self.navigationController?.navigationBar.tintColor = .white
@@ -38,15 +41,22 @@ class WeatherViewController: UIViewController ,WeatherView {
         self.view.addSubview(loadingView)
         
         weatherViewModel = WeatherViewModel(view: self, vc: self)
-        weatherViewModel.getCityWeather(lat: lat, lng: lng)
-        
-        
+        if shouldCache {
+            let decoded  = userDefaults.object(forKey: "object") as! Data
+            self.weather = NSKeyedUnarchiver.unarchiveObject(with: decoded) as! Weather
+            Toast.showAlert(viewController: self, text: "This is a Cached Data.", style: .alert, UIAlertAction(title: "ok", style: .default, handler: { (action) in
+                self.setPageLayout()
+            }))
+            
+        } else {
+            weatherViewModel.getCityWeather(lat: lat, lng: lng)
+        }
     }
     
     func setPageLayout()  {
         labelCity.text = weather.city.name
         labelWeatherMainTitle.text = weather.name
-        labelWeatherSubTitle.text = weather.description
+        labelWeatherSubTitle.text = weather.weatherDescription
         let imgUrl = "http://openweathermap.org/img/w/\(weather.icon!).png"
         weatherImageView?.sd_setImage(with: URL(string: imgUrl), completed: nil)
         labelWinds.text = "Winds Speed \(weather.windsSpeed!)m/s"
@@ -62,6 +72,12 @@ class WeatherViewController: UIViewController ,WeatherView {
             break
         case .getCityWeather(let weather):
             self.weather = weather
+            
+            //Cache Data
+            let encodedData: Data = NSKeyedArchiver.archivedData(withRootObject: weather)
+            userDefaults.set(encodedData, forKey: "object")
+            userDefaults.synchronize()
+
             setPageLayout()
             break
         case.onError(let str):

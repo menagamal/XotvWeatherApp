@@ -16,7 +16,6 @@ class City:BaseModel {
     override init() {
         super.init()
     }
-    
     override init(json:[String:Any]) {
         
         super.init(json: json)
@@ -28,5 +27,6 @@ class City:BaseModel {
         }
       
     }
+   
     
 }
